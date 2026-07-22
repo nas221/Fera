@@ -1,0 +1,25 @@
+{
+  "name": "fera",
+  "version": "1.0.0",
+  "description": "Simple football live scores website built with HTML, CSS, and JavaScript.",
+  "main": "script.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nas221/Fera.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nas221/Fera/issues"
+  },
+  "homepage": "https://github.com/nas221/Fera#readme",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.10"
+  }
+}
