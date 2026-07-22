@@ -2,6 +2,12 @@
 
 Simple football live scores website built with HTML, CSS, and JavaScript.
 
+## Features
+
+- Local user authentication (sign up, log in, log out)
+- Persistent storage with `localStorage` for user accounts, login session, and cached scores
+- Live football score refresh with fallback score display
+
 ## Run locally
 
 From `/home/runner/work/Fera/Fera`:

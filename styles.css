@@ -23,6 +23,39 @@ h1 {
   margin-bottom: 0.5rem;
 }
 
+.auth-panel {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #374151;
+  background: #1f2937;
+}
+
+.auth-panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.auth-form input {
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.55rem 0.65rem;
+}
+
 .last-updated {
   margin: 0 0 1rem;
   color: #d1d5db;
@@ -41,6 +74,37 @@ button {
 
 button:hover {
   background: #1d4ed8;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background: #4b5563;
+  margin: 0;
+}
+
+.secondary-button:hover {
+  background: #374151;
+}
+
+.session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.auth-status {
+  margin: 0;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+
+.auth-status.is-error {
+  color: #fca5a5;
 }
 
 .scores {
