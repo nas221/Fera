@@ -8,7 +8,10 @@
   </head>
   <body>
     <main class="container">
-      <h1>Football Live Scores</h1>
+      <header class="hero">
+        <h1>Football Live Scores</h1>
+        <p class="subtitle">Track match updates at a glance.</p>
+      </header>
       <section class="auth-panel" aria-label="User authentication">
         <h2>Account</h2>
         <form id="signup-form" class="auth-form">
@@ -38,8 +41,10 @@
           <button id="logout" type="button" class="secondary-button" hidden>Log Out</button>
         </div>
       </section>
-      <p id="last-updated" class="last-updated">Loading live scores…</p>
-      <button id="refresh" type="button">Refresh Scores</button>
+      <div class="toolbar">
+        <p id="last-updated" class="last-updated">Loading live scores…</p>
+        <button id="refresh" type="button">Refresh Scores</button>
+      </div>
       <section id="scores" class="scores" aria-live="polite"></section>
     </main>
 
@@ -47,8 +52,10 @@
       <article class="score-card">
         <p class="league"></p>
         <p class="teams"></p>
-        <p class="score"></p>
-        <p class="status"></p>
+        <p class="score-line">
+          <span class="score"></span>
+          <span class="status"></span>
+        </p>
       </article>
     </template>
 

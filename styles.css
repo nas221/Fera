@@ -9,18 +9,37 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #111827;
+  background: radial-gradient(circle at top, #1f2b46 0%, #0f172a 55%, #020617 100%);
   color: #f9fafb;
+  min-height: 100vh;
 }
 
 .container {
   max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 1rem 3rem;
+  padding: 2.5rem 1rem 3rem;
+}
+
+.hero {
+  margin-bottom: 1rem;
 }
 
 h1 {
-  margin-bottom: 0.5rem;
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0.4rem 0 0;
+  color: #cbd5e1;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .auth-panel {
@@ -57,23 +76,34 @@ h1 {
 }
 
 .last-updated {
-  margin: 0 0 1rem;
+  margin: 0;
   color: #d1d5db;
+  font-size: 0.95rem;
 }
 
 button {
   border: 0;
   border-radius: 0.5rem;
-  background: #2563eb;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   padding: 0.6rem 1rem;
   font-weight: 700;
   cursor: pointer;
-  margin-bottom: 1rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
 
 button:hover {
-  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 button:disabled {
@@ -114,10 +144,18 @@ button:disabled {
 }
 
 .score-card {
-  background: #1f2937;
-  border: 1px solid #374151;
+  background: rgba(17, 24, 39, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 0.75rem;
   padding: 1rem;
+  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.35);
+  backdrop-filter: blur(6px);
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.score-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(96, 165, 250, 0.6);
 }
 
 .score-card p {
@@ -139,6 +177,45 @@ button:disabled {
   font-weight: 800;
 }
 
+.score-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .status {
-  color: #f59e0b;
+  color: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: #334155;
+  letter-spacing: 0.01em;
+}
+
+.status-live {
+  background: #dc2626;
+}
+
+.status-half {
+  background: #d97706;
+}
+
+.status-finished {
+  background: #16a34a;
+}
+
+.status-upcoming {
+  background: #475569;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding-top: 1.6rem;
+  }
+
+  .teams {
+    font-size: 1rem;
+  }
 }

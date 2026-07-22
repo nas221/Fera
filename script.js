@@ -38,6 +38,24 @@ const FALLBACK_MATCHES = [
   }
 ];
 
+function getStatusType(statusText) {
+  const text = String(statusText || '').toUpperCase();
+
+  if (text.includes('FT') || text.includes('AET') || text.includes('PEN')) {
+    return 'finished';
+  }
+
+  if (text.includes('HT')) {
+    return 'half';
+  }
+
+  if (text.includes("'") || text.includes('LIVE')) {
+    return 'live';
+  }
+
+  return 'upcoming';
+}
+
 let currentUser = null;
 
 function parseStoredValue(key, fallbackValue) {
@@ -134,11 +152,9 @@ function setCurrentUser(username) {
   }
 
   clearSession();
-  setAuthStatus('Not logged in.');
+  setAuthStatus('Not logged in. Browsing as guest.');
   logoutButton.hidden = true;
-  refreshButton.disabled = true;
-  updatedLabel.textContent = 'Log in to load live scores.';
-  renderScores([]);
+  refreshButton.disabled = false;
 }
 
 function loadCachedMatches(username) {
@@ -155,6 +171,7 @@ function cacheMatches(username, matches) {
 
 function renderScores(matches) {
   scoresContainer.replaceChildren();
+  scoresContainer.removeAttribute('aria-busy');
 
   if (!matches.length) {
     scoresContainer.textContent = 'No live matches right now.';
@@ -166,7 +183,10 @@ function renderScores(matches) {
     fragment.querySelector('.league').textContent = match.league;
     fragment.querySelector('.teams').textContent = `${match.homeTeam} vs ${match.awayTeam}`;
     fragment.querySelector('.score').textContent = `${match.homeScore} - ${match.awayScore}`;
-    fragment.querySelector('.status').textContent = match.status;
+    const statusElement = fragment.querySelector('.status');
+    const statusType = getStatusType(match.status);
+    statusElement.textContent = match.status;
+    statusElement.classList.add(`status-${statusType}`);
     scoresContainer.appendChild(fragment);
   });
 }
@@ -189,12 +209,9 @@ function mapEspnEvents(events) {
 }
 
 async function loadScores() {
-  if (!currentUser) {
-    setAuthStatus('Log in to load live scores.');
-    return;
-  }
-
   refreshButton.disabled = true;
+  scoresContainer.setAttribute('aria-busy', 'true');
+  updatedLabel.textContent = 'Updating live scores…';
 
   try {
     const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard');
@@ -206,13 +223,19 @@ async function loadScores() {
     const data = await response.json();
     const matches = mapEspnEvents(data.events);
     const resolvedMatches = matches.length ? matches : FALLBACK_MATCHES;
-    cacheMatches(currentUser, resolvedMatches);
+
+    if (currentUser) {
+      cacheMatches(currentUser, resolvedMatches);
+    }
+
     renderScores(resolvedMatches);
-  } catch {
-    const cachedMatches = loadCachedMatches(currentUser);
-    renderScores(cachedMatches.length ? cachedMatches : FALLBACK_MATCHES);
-  } finally {
     updatedLabel.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+  } catch {
+    const cachedMatches = currentUser ? loadCachedMatches(currentUser) : [];
+    const usingCached = cachedMatches.length > 0;
+    renderScores(usingCached ? cachedMatches : FALLBACK_MATCHES);
+    updatedLabel.textContent = `${usingCached ? 'Showing cached scores' : 'Showing sample scores'} · Updated: ${new Date().toLocaleTimeString()}`;
+  } finally {
     refreshButton.disabled = false;
   }
 }
@@ -286,6 +309,7 @@ function initializeAuth() {
 
   if (!existingSession) {
     setCurrentUser(null);
+    loadScores();
     return;
   }
 
@@ -293,6 +317,7 @@ function initializeAuth() {
 
   if (!user) {
     setCurrentUser(null);
+    loadScores();
     return;
   }
 
