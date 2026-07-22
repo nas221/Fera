@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Football Live Scores</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Football Live Scores</h1>
+      <p id="last-updated" class="last-updated">Loading live scores…</p>
+      <button id="refresh" type="button">Refresh Scores</button>
+      <section id="scores" class="scores" aria-live="polite"></section>
+    </main>
+
+    <template id="score-card-template">
+      <article class="score-card">
+        <p class="league"></p>
+        <p class="teams"></p>
+        <p class="score"></p>
+        <p class="status"></p>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>

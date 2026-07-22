@@ -1,0 +1,80 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111827;
+  color: #f9fafb;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+h1 {
+  margin-bottom: 0.5rem;
+}
+
+.last-updated {
+  margin: 0 0 1rem;
+  color: #d1d5db;
+}
+
+button {
+  border: 0;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.scores {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.score-card {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.score-card p {
+  margin: 0.35rem 0;
+}
+
+.league {
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.teams {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.score {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.status {
+  color: #f59e0b;
+}
