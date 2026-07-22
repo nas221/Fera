@@ -1,7 +1,15 @@
 const scoresContainer = document.getElementById('scores');
 const updatedLabel = document.getElementById('last-updated');
 const refreshButton = document.getElementById('refresh');
+const logoutButton = document.getElementById('logout');
+const authStatusLabel = document.getElementById('auth-status');
+const signupForm = document.getElementById('signup-form');
+const loginForm = document.getElementById('login-form');
 const cardTemplate = document.getElementById('score-card-template');
+
+const USERS_STORAGE_KEY = 'fera_users_v1';
+const SESSION_STORAGE_KEY = 'fera_session_v1';
+const SCORE_CACHE_STORAGE_KEY = 'fera_score_cache_v1';
 
 const FALLBACK_MATCHES = [
   {
@@ -46,6 +54,119 @@ function getStatusType(statusText) {
   }
 
   return 'upcoming';
+}
+
+let currentUser = null;
+
+function parseStoredValue(key, fallbackValue) {
+  try {
+    const value = localStorage.getItem(key);
+
+    if (!value) {
+      return fallbackValue;
+    }
+
+    return JSON.parse(value);
+  } catch {
+    return fallbackValue;
+  }
+}
+
+function readUsers() {
+  const users = parseStoredValue(USERS_STORAGE_KEY, []);
+  return Array.isArray(users) ? users : [];
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function readScoreCache() {
+  const scoreCache = parseStoredValue(SCORE_CACHE_STORAGE_KEY, {});
+  return scoreCache && typeof scoreCache === 'object' ? scoreCache : {};
+}
+
+function saveScoreCache(scoreCache) {
+  localStorage.setItem(SCORE_CACHE_STORAGE_KEY, JSON.stringify(scoreCache));
+}
+
+function readSession() {
+  const session = parseStoredValue(SESSION_STORAGE_KEY, null);
+
+  if (!session || typeof session.username !== 'string') {
+    return null;
+  }
+
+  return session;
+}
+
+function saveSession(username) {
+  localStorage.setItem(
+    SESSION_STORAGE_KEY,
+    JSON.stringify({
+      username
+    })
+  );
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+function normalizeUsername(username) {
+  return username.trim().toLowerCase();
+}
+
+function findUserByName(users, username) {
+  const normalized = normalizeUsername(username);
+  return users.find((user) => normalizeUsername(user.username) === normalized);
+}
+
+async function hashPassword(password) {
+  if (window.crypto?.subtle) {
+    const encoder = new TextEncoder();
+    const encoded = encoder.encode(password);
+    const digest = await window.crypto.subtle.digest('SHA-256', encoded);
+    return Array.from(new Uint8Array(digest))
+      .map((value) => value.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  return btoa(password);
+}
+
+function setAuthStatus(message, isError = false) {
+  authStatusLabel.textContent = message;
+  authStatusLabel.classList.toggle('is-error', isError);
+}
+
+function setCurrentUser(username) {
+  currentUser = username;
+
+  if (username) {
+    saveSession(username);
+    setAuthStatus(`Signed in as ${username}.`);
+    logoutButton.hidden = false;
+    refreshButton.disabled = false;
+    return;
+  }
+
+  clearSession();
+  setAuthStatus('Not logged in. Browsing as guest.');
+  logoutButton.hidden = true;
+  refreshButton.disabled = false;
+}
+
+function loadCachedMatches(username) {
+  const scoreCache = readScoreCache();
+  const matches = scoreCache[normalizeUsername(username)];
+  return Array.isArray(matches) ? matches : [];
+}
+
+function cacheMatches(username, matches) {
+  const scoreCache = readScoreCache();
+  scoreCache[normalizeUsername(username)] = matches;
+  saveScoreCache(scoreCache);
 }
 
 function renderScores(matches) {
@@ -101,16 +222,119 @@ async function loadScores() {
 
     const data = await response.json();
     const matches = mapEspnEvents(data.events);
-    renderScores(matches.length ? matches : FALLBACK_MATCHES);
+    const resolvedMatches = matches.length ? matches : FALLBACK_MATCHES;
+
+    if (currentUser) {
+      cacheMatches(currentUser, resolvedMatches);
+    }
+
+    renderScores(resolvedMatches);
     updatedLabel.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
   } catch {
-    renderScores(FALLBACK_MATCHES);
-    updatedLabel.textContent = `Showing sample scores · Updated: ${new Date().toLocaleTimeString()}`;
+    const cachedMatches = currentUser ? loadCachedMatches(currentUser) : [];
+    const usingCached = cachedMatches.length > 0;
+    renderScores(usingCached ? cachedMatches : FALLBACK_MATCHES);
+    updatedLabel.textContent = `${usingCached ? 'Showing cached scores' : 'Showing sample scores'} · Updated: ${new Date().toLocaleTimeString()}`;
   } finally {
     refreshButton.disabled = false;
   }
 }
 
+async function handleSignup(event) {
+  event.preventDefault();
+  const formData = new FormData(signupForm);
+  const username = (formData.get('username') || '').toString().trim();
+  const password = (formData.get('password') || '').toString();
+
+  if (username.length < 3 || password.length < 6) {
+    setAuthStatus('Username must be 3+ chars and password 6+ chars.', true);
+    return;
+  }
+
+  const users = readUsers();
+
+  if (findUserByName(users, username)) {
+    setAuthStatus('That username already exists.', true);
+    return;
+  }
+
+  const passwordHash = await hashPassword(password);
+  users.push({
+    username,
+    passwordHash
+  });
+  saveUsers(users);
+  signupForm.reset();
+  setAuthStatus('Account created. You can now log in.');
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const formData = new FormData(loginForm);
+  const username = (formData.get('username') || '').toString().trim();
+  const password = (formData.get('password') || '').toString();
+  const users = readUsers();
+  const user = findUserByName(users, username);
+
+  if (!user) {
+    setAuthStatus('User not found.', true);
+    return;
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  if (passwordHash !== user.passwordHash) {
+    setAuthStatus('Invalid credentials.', true);
+    return;
+  }
+
+  loginForm.reset();
+  setCurrentUser(user.username);
+  const cachedMatches = loadCachedMatches(user.username);
+
+  if (cachedMatches.length) {
+    renderScores(cachedMatches);
+    updatedLabel.textContent = 'Showing cached scores. Refreshing live data…';
+  }
+
+  loadScores();
+}
+
+function handleLogout() {
+  setCurrentUser(null);
+}
+
+function initializeAuth() {
+  const existingSession = readSession();
+
+  if (!existingSession) {
+    setCurrentUser(null);
+    loadScores();
+    return;
+  }
+
+  const user = findUserByName(readUsers(), existingSession.username);
+
+  if (!user) {
+    setCurrentUser(null);
+    loadScores();
+    return;
+  }
+
+  setCurrentUser(user.username);
+  const cachedMatches = loadCachedMatches(user.username);
+
+  if (cachedMatches.length) {
+    renderScores(cachedMatches);
+    updatedLabel.textContent = 'Showing cached scores. Refreshing live data…';
+  }
+
+  loadScores();
+}
+
+signupForm.addEventListener('submit', handleSignup);
+loginForm.addEventListener('submit', handleLogin);
+logoutButton.addEventListener('click', handleLogout);
 refreshButton.addEventListener('click', loadScores);
-loadScores();
+initializeAuth();
 setInterval(loadScores, 60000);

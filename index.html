@@ -12,6 +12,35 @@
         <h1>Football Live Scores</h1>
         <p class="subtitle">Track match updates at a glance.</p>
       </header>
+      <section class="auth-panel" aria-label="User authentication">
+        <h2>Account</h2>
+        <form id="signup-form" class="auth-form">
+          <label>
+            Username
+            <input id="signup-username" name="username" type="text" autocomplete="username" required minlength="3" />
+          </label>
+          <label>
+            Password
+            <input id="signup-password" name="password" type="password" autocomplete="new-password" required minlength="6" />
+          </label>
+          <button type="submit">Sign Up</button>
+        </form>
+        <form id="login-form" class="auth-form">
+          <label>
+            Username
+            <input id="login-username" name="username" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            Password
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit">Log In</button>
+        </form>
+        <div class="session-row">
+          <p id="auth-status" class="auth-status">Not logged in.</p>
+          <button id="logout" type="button" class="secondary-button" hidden>Log Out</button>
+        </div>
+      </section>
       <div class="toolbar">
         <p id="last-updated" class="last-updated">Loading live scores…</p>
         <button id="refresh" type="button">Refresh Scores</button>
