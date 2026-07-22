@@ -30,8 +30,27 @@ const FALLBACK_MATCHES = [
   }
 ];
 
+function getStatusType(statusText) {
+  const text = String(statusText || '').toUpperCase();
+
+  if (text.includes('FT') || text.includes('AET') || text.includes('PEN')) {
+    return 'finished';
+  }
+
+  if (text.includes('HT')) {
+    return 'half';
+  }
+
+  if (text.includes("'") || text.includes('LIVE')) {
+    return 'live';
+  }
+
+  return 'upcoming';
+}
+
 function renderScores(matches) {
   scoresContainer.replaceChildren();
+  scoresContainer.removeAttribute('aria-busy');
 
   if (!matches.length) {
     scoresContainer.textContent = 'No live matches right now.';
@@ -43,7 +62,10 @@ function renderScores(matches) {
     fragment.querySelector('.league').textContent = match.league;
     fragment.querySelector('.teams').textContent = `${match.homeTeam} vs ${match.awayTeam}`;
     fragment.querySelector('.score').textContent = `${match.homeScore} - ${match.awayScore}`;
-    fragment.querySelector('.status').textContent = match.status;
+    const statusElement = fragment.querySelector('.status');
+    const statusType = getStatusType(match.status);
+    statusElement.textContent = match.status;
+    statusElement.classList.add(`status-${statusType}`);
     scoresContainer.appendChild(fragment);
   });
 }
@@ -67,6 +89,8 @@ function mapEspnEvents(events) {
 
 async function loadScores() {
   refreshButton.disabled = true;
+  scoresContainer.setAttribute('aria-busy', 'true');
+  updatedLabel.textContent = 'Updating live scores…';
 
   try {
     const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard');
@@ -78,10 +102,11 @@ async function loadScores() {
     const data = await response.json();
     const matches = mapEspnEvents(data.events);
     renderScores(matches.length ? matches : FALLBACK_MATCHES);
+    updatedLabel.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
   } catch {
     renderScores(FALLBACK_MATCHES);
+    updatedLabel.textContent = `Showing sample scores · Updated: ${new Date().toLocaleTimeString()}`;
   } finally {
-    updatedLabel.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
     refreshButton.disabled = false;
   }
 }
