@@ -12,6 +12,24 @@
       <p id="last-updated" class="last-updated">Loading live scores…</p>
       <button id="refresh" type="button">Refresh Scores</button>
       <section id="scores" class="scores" aria-live="polite"></section>
+
+      <section class="player-search-section" aria-labelledby="player-search-heading">
+        <h2 id="player-search-heading">Premier League Player Search</h2>
+        <form id="player-search-form" class="player-search-form">
+          <input
+            id="player-query"
+            name="playerQuery"
+            type="search"
+            placeholder="Search player name"
+            required
+          />
+          <button id="player-search-button" type="submit">Search</button>
+        </form>
+        <p id="search-feedback" class="search-feedback">
+          Search Wikipedia for Premier League player profiles.
+        </p>
+        <section id="player-results" class="player-results" aria-live="polite"></section>
+      </section>
     </main>
 
     <template id="score-card-template">
@@ -20,6 +38,15 @@
         <p class="teams"></p>
         <p class="score"></p>
         <p class="status"></p>
+      </article>
+    </template>
+
+    <template id="player-card-template">
+      <article class="player-card">
+        <img class="player-image" alt="" hidden />
+        <h3 class="player-name"></h3>
+        <p class="player-summary"></p>
+        <a class="player-link" target="_blank" rel="noopener noreferrer">View on Wikipedia</a>
       </article>
     </template>
 
